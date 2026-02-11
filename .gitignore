@@ -144,5 +144,5 @@ npm-debug.log*
 *.stylelintrc.*
 *.babelrc
 *.eslintcache
-coverage/
+#coverage/
 
