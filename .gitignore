@@ -146,3 +146,4 @@ npm-debug.log*
 *.eslintcache
 #coverage/
 
+.venv

@@ -84,6 +84,15 @@ class Product:
     def __repr__(self):
         return f'Product({self.name}, {self.price}, {self.quantity})'
 
+    def __str__(self):
+        return f'{self.name}, {self.price:.2f} руб. Остаток: {self.quantity} шт.'
+
+    def __add__(self, other):
+        if isinstance(other, Product):
+            return self.price * self.quantity + other.price * other.quantity
+        else:
+            raise TypeError("Операция возможна только между объектами класса Product")
+
 
 
 class Category:
@@ -117,5 +126,10 @@ class Category:
         return "\n".join(result)
 
     def __repr__(self):
-        return f'Category(\n{self.products})\n'
+        return f'Category(\n{self.products}\n)'
+
+    def __str__(self):
+        total_quantity = sum(p.quantity for p in self.__products)
+        return f'Категория "{self.__class__.__name__}", количество продуктов: {total_quantity} шт.'
+
 
