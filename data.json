@@ -1,0 +1,21 @@
+{
+    "categories": [
+        {
+            "name": "Телефоны",
+            "description": "Современные модели смартфонов",
+            "products": [
+                {"name": "iPhone X", "description": "Apple iPhone X", "price": 100000, "quantity": 10},
+                {"name": "Galaxy S20", "description": "Samsung Galaxy S20", "price": 80000, "quantity": 5}
+            ]
+        },
+        {
+            "name": "Ноутбуки",
+            "description": "Высокопроизводительные ноутбуки",
+            "products": [
+                {"name": "MacBook Pro", "description": "Apple MacBook Pro", "price": 150000, "quantity": 3},
+                {"name": "Surface Laptop", "description": "Microsoft Surface Laptop", "price": 120000, "quantity": 7}
+            ]
+        }
+    ]
+}
+
