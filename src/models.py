@@ -22,7 +22,10 @@ class Product:
     @price.setter
     def price(self, value):
         if value <= 0:
-            raise ValueError("Ошибка: цена не должна быть нулевой или отрицательной!")
+            raise ValueError(
+                "Ошибка: цена не должна быть нулевой "
+                "или отрицательной!"
+            )
         else:
             self.__price = value
 
@@ -38,16 +41,19 @@ class Product:
             self.__quantity = value
 
     def __repr__(self):
-        return f'Product({self.name}, {self.price}, {self.quantity})'
+        return f"Product({self.name}, {self.price}, {self.quantity})"
 
     def __str__(self):
-        return f"{self.name}, {self.price:.2f} руб. Остаток: {self.quantity} шт."
+        return (
+            f"{self.name}, {self.price:.2f} руб. "
+            f"Остаток: {self.quantity} шт."
+        )
 
     def __add__(self, other):
         if isinstance(other, Product):
             return self.price * self.quantity + other.price * other.quantity
         else:
-            raise TypeError("Операция возможна только между объектами класса Product")
+            raise TypeError("Только объекты класса Product допускаются")
 
     @staticmethod
     def validate_price(price):
@@ -61,10 +67,10 @@ class Product:
 
     @classmethod
     def new_product(cls, data, existing_products=None):
-        name = data['name']
-        description = data.get('description', '')
-        price = float(data['price'])
-        quantity = int(data['quantity'])
+        name = data["name"]
+        description = data.get("description", "")
+        price = float(data["price"])
+        quantity = int(data["quantity"])
 
         if existing_products is not None:
             for product in existing_products:
@@ -104,8 +110,11 @@ class Category:
         return self.__products
 
     def __repr__(self):
-        return f'Category(\n{self.products}\n)'
+        return f"Category(\n{self.products}\n)"
 
     def __str__(self):
         total_quantity = sum(p.quantity for p in self.__products)
-        return f'Категория "{self.name}", количество продуктов: {total_quantity} шт.'
+        return (
+            f'Категория "{self.name}", '
+            f'количество продуктов: {total_quantity} шт.'
+        )

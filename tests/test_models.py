@@ -1,8 +1,9 @@
 import pytest
-from src.models import Product, Category
 
+from src.models import Category, Product
 
 # --- Тесты для класса Product ---
+
 
 def test_product_initialization():
     """Проверка правильного создания экземпляра Product"""
@@ -51,10 +52,15 @@ def test_validate_price():
 
 def test_new_product_class_method_existing():
     """Проверка class-метода при наличии товара"""
-    product_data = {'name': 'Test Phone', 'description': '', 'price': 10000.0, 'quantity': 5}
+    product_data = {
+        "name": "Test Phone",
+        "description": "",
+        "price": 10000.0,
+        "quantity": 5,
+    }
     existing_products = [
         Product("Test Phone", "Some description", 5000.0, 3),
-        Product("Another Phone", "Different description", 15000.0, 10)
+        Product("Another Phone", "Different description", 15000.0, 10),
     ]
     updated_product = Product.new_product(product_data, existing_products)
     assert updated_product.quantity == 8  # Старое кол-во плюс новое
@@ -63,10 +69,15 @@ def test_new_product_class_method_existing():
 
 def test_new_product_class_method_new():
     """Проверка class-метода при отсутствии товара"""
-    product_data = {'name': 'New Phone', 'description': '', 'price': 10000.0, 'quantity': 5}
+    product_data = {
+        "name": "New Phone",
+        "description": "",
+        "price": 10000.0,
+        "quantity": 5,
+    }
     existing_products = [
         Product("Test Phone", "Some description", 5000.0, 3),
-        Product("Another Phone", "Different description", 15000.0, 10)
+        Product("Another Phone", "Different description", 15000.0, 10),
     ]
     new_product = Product.new_product(product_data, existing_products)
     assert isinstance(new_product, Product)
@@ -79,7 +90,9 @@ def test_product_representation():
     """Проверка метода __repr__"""
     product = Product("Test Phone", "Some description", 10000.0, 5)
     representation = repr(product)
-    assert representation.startswith("Product(Test Phone")  # Ожидаемый вывод начинается с имени товара
+    assert representation.startswith(
+        "Product(Test Phone"
+    )  # Ожидаемый вывод начинается с имени товара
 
 
 def test_product_string_representation():
@@ -101,6 +114,7 @@ def test_product_sum_operator():
 
 # --- Тесты для класса Category ---
 
+
 def test_category_initialization():
     """Проверка правильной инициализации категории"""
     category = Category("Electronics", "All kinds of electronics")
@@ -121,8 +135,10 @@ def test_category_representation():
     product = Product("Test Phone", "Some description", 10000.0, 5)
     category.add_product(product)
     representation = repr(category)
-    expected_repr = f'Category(\n[Product(Test Phone, 10000.0, 5)]\n)'
-    assert representation == expected_repr, "Представление не соответствует ожиданиям."
+    expected_repr = "Category(\n[Product(Test Phone, 10000.0, 5)]\n)"
+    assert representation == expected_repr, (
+        "Представление не соответствует ожиданиям."
+    )
 
 
 def test_category_string_representation():
@@ -131,7 +147,7 @@ def test_category_string_representation():
     product = Product("Test Phone", "Some description", 10000.0, 5)
     category.add_product(product)
     string_representation = str(category)
-    assert "Категория \"Electronics\"" in string_representation
+    assert 'Категория "Electronics"' in string_representation
     assert "количество продуктов: 5 шт." in string_representation
 
 
@@ -143,4 +159,6 @@ def test_get_total_quantity():
     category.add_product(product1)
     category.add_product(product2)
     assert category.product_count() == 2
-    assert sum([p.quantity for p in category.products]) == 15  # Суммарное количество товаров
+    assert (
+        sum([p.quantity for p in category.products]) == 15
+    )  # Суммарное количество товаров
