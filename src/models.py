@@ -41,7 +41,7 @@ class Product:
         return f'Product({self.name}, {self.price}, {self.quantity})'
 
     def __str__(self):
-        return f'{self.name}, {self.price:.2f} руб. Остаток: {self.quantity} шт.'
+        return f"{self.name}, {self.price:.2f} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
         if isinstance(other, Product):

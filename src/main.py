@@ -1,34 +1,56 @@
 from src.models import Product, Category
 
 if __name__ == "__main__":
-    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
-    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+    try:
+        product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+        product2 = Product("iPhone 15", "512GB, Gray Space", 210000.0, 8)
+        product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
 
-    category1 = Category(
-        "Смартфоны",
-        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-        [product1, product2, product3]
-    )
+        category1 = Category(
+            "Смартфоны",
+            "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+            [product1, product2, product3]
+        )
 
-    print(category1.products)
-    product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
-    category1.add_product(product4)
-    print(category1.products)
-    print(category1.product_count())
+        print(f"Категории перед добавлением новых товаров:\n{category1}")
 
-    new_product = Product.new_product(
-        {"name": "Samsung Galaxy S23 Ultra", "description": "256GB, Серый цвет, 200MP камера", "price": 180000.0,
-         "quantity": 5})
-    print(new_product.name)
-    print(new_product.description)
-    print(new_product.price)
-    print(new_product.quantity)
+        # Добавляем новый товар
+        product4 = Product("55\" QLED 4K TV", "Фоновая подсветка", 123000.0, 7)
+        category1.add_product(product4)
 
-    new_product.price = 800
-    print(new_product.price)
+        print("\nКатегории после добавления новых товаров:")
+        print(category1)
+        print(f"Количество товаров в категории: {category1.product_count()}")
 
-    new_product.price = -100
-    print(new_product.price)
-    new_product.price = 0
-    print(new_product.price)
+        # Проверяем создание нового товара методом .new_product()
+        new_product_data = {
+            'name': 'Samsung Galaxy S23 Ultra',
+            'description': '256GB, Серый цвет, 200MP камера',
+            'price': 180000.0,
+            'quantity': 5
+        }
+
+        new_product = Product.new_product(new_product_data)
+        print("\nНовый созданный объект товара:", new_product)
+
+        # Изменение цены и проверка реакции на ошибку
+        try:
+            new_product.price = 800
+            print(f"\nНовая цена: {new_product.price}")
+
+            # Установка недопустимой цены
+            new_product.price = -100
+        except ValueError as e:
+            print(e)
+
+        # Обновление количества товара
+        new_product.quantity -= 3
+        print(f"\nИзмененное количество товара: {new_product.quantity}")
+
+        # Тестируем статический метод проверки цены
+        print(Product.validate_price(-1))  # Должно вернуть False
+        print(Product.validate_price(100))  # Должно вернуть True
+
+    except Exception as ex:
+        print(f"Произошла ошибка: {ex}")
+
