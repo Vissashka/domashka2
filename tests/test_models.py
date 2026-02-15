@@ -37,21 +37,16 @@ def test_product_quantity_setter_positive():
 
 # Тесты для ограничения сложения (задание 2)
 def test_addition_same_type():
-    phone1 = Smartphone("Galaxy S23", "S23", 256, "Black", "High", 100000, 10)
-    phone2 = Smartphone("Pixel 7 Pro", "Pro", 512, "White", "Medium", 80000, 5)
-
+    phone1 = Smartphone("Galaxy S23", "S23", "Samsung", 256, "Black", "High", 100000, 10)
+    phone2 = Smartphone("Pixel 7 Pro", "Google", "Pro", 512, "White", "Medium", 80000, 5)
     result = phone1 + phone2
-    expected_result = (
-            phone1.price * phone1.quantity +
-            phone2.price * phone2.quantity
-    )
+    expected_result = phone1.price * phone1.quantity + phone2.price * phone2.quantity
     assert result == expected_result
 
 
 def test_addition_different_types():
-    grass = LawnGrass("Газонная трава", "Germany", 14, "Green", 1000, 100)
-    phone = Smartphone("Galaxy S23", "S23", 256, "Black", "High", 100000, 10)
-
+    grass = LawnGrass("Газонная трава", "Turf Description", "Germany", 14, "Green", 1000, 100)
+    phone = Smartphone("Galaxy S23", "S23", "Samsung", 256, "Black", "High", 100000, 10)
     with pytest.raises(TypeError):
         grass + phone
 
@@ -74,15 +69,7 @@ def test_category_add_invalid_object():
 
 # Тесты для классов-наследников
 def test_smartphone_initialization():
-    smartphone = Smartphone(
-        "Galaxy S23",
-        "S23",
-        256,
-        "Black",
-        "High",
-        100000,
-        10
-    )
+    smartphone = Smartphone("Galaxy S23", "Samsung", "S23", 256, "Black", "High", 100000, 10)
     assert smartphone.name == "Galaxy S23"
     assert smartphone.model == "S23"
     assert smartphone.memory == 256
@@ -91,18 +78,11 @@ def test_smartphone_initialization():
 
 
 def test_lawngrass_initialization():
-    lawngrass = LawnGrass(
-        "Газонная трава",
-        "Германия",
-        14,
-        "Зеленый",
-        1000,
-        100
-    )
+    lawngrass = LawnGrass("Газонная трава", "German Grass", "Germany", 14, "Green", 1000, 100)
     assert lawngrass.name == "Газонная трава"
-    assert lawngrass.country == "Германия"
+    assert lawngrass.country == "Germany"
     assert lawngrass.germination_period == 14
-    assert lawngrass.color == "Зеленый"
+    assert lawngrass.color == "Green"
 
 
 def test_product_quantity_setter_negative():

@@ -22,9 +22,7 @@ class Product:
     @price.setter
     def price(self, value):
         if value <= 0:
-            raise ValueError(
-                "Цена не должна быть нулевой или отрицательной!"
-            )
+            raise ValueError("Ошибка: цена не должна быть нулевой или отрицательной!")
         else:
             self.__price = value
 
@@ -43,22 +41,16 @@ class Product:
         return f"Product({self.name}, {self.price}, {self.quantity})"
 
     def __str__(self):
-        return (
-            f"{self.name}, {self.price:.2f} руб., "
-            f"Остаток: {self.quantity} шт."
-        )
+        return f"{self.name}, {self.price:.2f} руб., Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        if not isinstance(other, self.__class__):
+        if type(self) != type(other):
             raise TypeError("Можно складывать только одинаковые типы товаров.")
 
         if isinstance(other, Product):
             return self.price * self.quantity + other.price * other.quantity
         else:
-            raise TypeError(
-                "Операция доступна только "
-                "для объектов класса Product"
-            )
+            raise TypeError("Операция доступна только для объектов класса Product")
 
     @staticmethod
     def validate_price(price):
@@ -91,20 +83,15 @@ class Product:
 class Smartphone(Product):
     """Класс описывает смартфон."""
 
-    def __init__(
-            self, name, model, memory, color, efficiency, price, quantity
-    ):
-        super().__init__(name, "", price, quantity)
+    def __init__(self, name, description, model, memory, color, efficiency, price, quantity):
+        super().__init__(name, description, price, quantity)
         self.model = model
         self.memory = memory
         self.color = color
         self.efficiency = efficiency
 
     def __repr__(self):
-        return (
-            f'Smartphone({self.name}, {self.model}, '
-            f'{self.memory}, {self.color})'
-        )
+        return f'Smartphone({self.name}, {self.model}, {self.memory}, {self.color})'
 
     def __str__(self):
         return f'{self.name}: {self.model}, {self.memory} ГБ, {self.color}'
@@ -113,26 +100,17 @@ class Smartphone(Product):
 class LawnGrass(Product):
     """Класс описывает газонную траву."""
 
-    def __init__(
-            self, name, country, germination_period, color, price, quantity
-    ):
-        super().__init__(name, "", price, quantity)
+    def __init__(self, name, description, country, germination_period, color, price, quantity):
+        super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
 
     def __repr__(self):
-        return (
-            f"LawnGrass({self.name}, {self.country}, "
-            f"{self.germination_period}, {self.color})"
-        )
+        return f"LawnGrass({self.name}, {self.country}, {self.germination_period}, {self.color})"
 
     def __str__(self):
-        return (
-            f'{self.name}: {self.country}, '
-            f'{self.germination_period} дней, '
-            f'{self.color}'
-        )
+        return f'{self.name}: {self.country}, {self.germination_period} дней, {self.color}'
 
 
 class Category:
@@ -155,10 +133,7 @@ class Category:
 
     def add_product(self, product):
         if not isinstance(product, Product):
-            raise TypeError(
-                "Можно добавлять только продукты "
-                "и их производные классы."
-            )
+            raise TypeError("Можно добавлять только продукты и их производные классы.")
 
         self.__products.append(product)
         Category._counter += 1
@@ -172,7 +147,4 @@ class Category:
 
     def __str__(self):
         total_quantity = sum(p.quantity for p in self.__products)
-        return (
-            f'Категория "{self.name}", '
-            f'Количество продуктов: {total_quantity} шт.'
-        )
+        return f'Категория "{self.name}", Количество продуктов: {total_quantity} шт.'
