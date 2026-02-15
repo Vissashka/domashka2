@@ -1,6 +1,6 @@
 import pytest
 
-from src.models import Category, Product
+from src.models import Category, Product, Smartphone, LawnGrass
 
 # --- Тесты для класса Product ---
 
@@ -33,6 +33,76 @@ def test_product_quantity_setter_positive():
     product = Product("Test Phone", "Some description", 10000.0, 5)
     product.quantity = 10
     assert product.quantity == 10
+
+
+# Тесты для ограничения сложения (задание 2)
+def test_addition_same_type():
+    phone1 = Smartphone("Galaxy S23", "S23", 256, "Black", "High", 100000, 10)
+    phone2 = Smartphone("Pixel 7 Pro", "Pro", 512, "White", "Medium", 80000, 5)
+
+    result = phone1 + phone2
+    expected_result = (
+            phone1.price * phone1.quantity +
+            phone2.price * phone2.quantity
+    )
+    assert result == expected_result
+
+
+def test_addition_different_types():
+    grass = LawnGrass("Газонная трава", "Germany", 14, "Green", 1000, 100)
+    phone = Smartphone("Galaxy S23", "S23", 256, "Black", "High", 100000, 10)
+
+    with pytest.raises(TypeError):
+        grass + phone
+
+
+# Тесты для метода add_product
+def test_category_add_valid_product():
+    category = Category("Электроника")
+    product = Product("Телефон", "Описание телефона", 10000, 5)
+    category.add_product(product)
+    assert len(category.products) == 1
+
+
+def test_category_add_invalid_object():
+    category = Category("Растения")
+    invalid_obj = {"test": "invalid"}
+
+    with pytest.raises(TypeError):
+        category.add_product(invalid_obj)
+
+
+# Тесты для классов-наследников
+def test_smartphone_initialization():
+    smartphone = Smartphone(
+        "Galaxy S23",
+        "S23",
+        256,
+        "Black",
+        "High",
+        100000,
+        10
+    )
+    assert smartphone.name == "Galaxy S23"
+    assert smartphone.model == "S23"
+    assert smartphone.memory == 256
+    assert smartphone.color == "Black"
+    assert smartphone.efficiency == "High"
+
+
+def test_lawngrass_initialization():
+    lawngrass = LawnGrass(
+        "Газонная трава",
+        "Германия",
+        14,
+        "Зеленый",
+        1000,
+        100
+    )
+    assert lawngrass.name == "Газонная трава"
+    assert lawngrass.country == "Германия"
+    assert lawngrass.germination_period == 14
+    assert lawngrass.color == "Зеленый"
 
 
 def test_product_quantity_setter_negative():
@@ -148,7 +218,7 @@ def test_category_string_representation():
     category.add_product(product)
     string_representation = str(category)
     assert 'Категория "Electronics"' in string_representation
-    assert "количество продуктов: 5 шт." in string_representation
+    assert "Количество продуктов: 5 шт." in string_representation
 
 
 def test_get_total_quantity():
