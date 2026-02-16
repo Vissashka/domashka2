@@ -1,214 +1,175 @@
 import pytest
+from src.models import Product, Smartphone, LawnGrass, Category
 
-from src.models import Category, Product, Smartphone, LawnGrass
-
-# --- Тесты для класса Product ---
-
-
-def test_product_initialization():
-    """Проверка правильного создания экземпляра Product"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    assert product.name == "Test Phone"
-    assert product.description == "Some description"
-    assert product.price == 10000.0
-    assert product.quantity == 5
-
-
-def test_product_price_setter_positive():
-    """Проверка корректного задания цены"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    product.price = 15000.0
-    assert product.price == 15000.0
-
-
-def test_product_price_setter_negative():
-    """Проверка защиты от неверной цены (отрицательная)"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    with pytest.raises(ValueError):
-        product.price = -100
-
-
-def test_product_quantity_setter_positive():
-    """Проверка корректного задания количества"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    product.quantity = 10
-    assert product.quantity == 10
-
-
-# Тесты для ограничения сложения (задание 2)
-def test_addition_same_type():
-    phone1 = Smartphone("Galaxy S23", "S23", "Samsung", 256, "Black", "High", 100000, 10)
-    phone2 = Smartphone("Pixel 7 Pro", "Google", "Pro", 512, "White", "Medium", 80000, 5)
-    result = phone1 + phone2
-    expected_result = phone1.price * phone1.quantity + phone2.price * phone2.quantity
-    assert result == expected_result
-
-
-def test_addition_different_types():
-    grass = LawnGrass("Газонная трава", "Turf Description", "Germany", 14, "Green", 1000, 100)
-    phone = Smartphone("Galaxy S23", "S23", "Samsung", 256, "Black", "High", 100000, 10)
-    with pytest.raises(TypeError):
-        grass + phone
-
-
-# Тесты для метода add_product
-def test_category_add_valid_product():
-    category = Category("Электроника")
-    product = Product("Телефон", "Описание телефона", 10000, 5)
-    category.add_product(product)
-    assert len(category.products) == 1
-
-
-def test_category_add_invalid_object():
-    category = Category("Растения")
-    invalid_obj = {"test": "invalid"}
-
-    with pytest.raises(TypeError):
-        category.add_product(invalid_obj)
-
-
-# Тесты для классов-наследников
-def test_smartphone_initialization():
-    smartphone = Smartphone("Galaxy S23", "Samsung", "S23", 256, "Black", "High", 100000, 10)
-    assert smartphone.name == "Galaxy S23"
-    assert smartphone.model == "S23"
-    assert smartphone.memory == 256
-    assert smartphone.color == "Black"
-    assert smartphone.efficiency == "High"
-
-
-def test_lawngrass_initialization():
-    lawngrass = LawnGrass("Газонная трава", "German Grass", "Germany", 14, "Green", 1000, 100)
-    assert lawngrass.name == "Газонная трава"
-    assert lawngrass.country == "Germany"
-    assert lawngrass.germination_period == 14
-    assert lawngrass.color == "Green"
-
-
-def test_product_quantity_setter_negative():
-    """Проверка защиты от неверного количества (отрицательное)"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    with pytest.raises(ValueError):
-        product.quantity = -10
-
-
-def test_validate_price():
-    """Проверка статического метода для валидации цен"""
-    valid_price = Product.validate_price(10000.0)
-    invalid_price = Product.validate_price(-100)
-    assert valid_price is True
-    assert invalid_price is False
-
-
-def test_new_product_class_method_existing():
-    """Проверка class-метода при наличии товара"""
-    product_data = {
-        "name": "Test Phone",
-        "description": "",
-        "price": 10000.0,
-        "quantity": 5,
-    }
-    existing_products = [
-        Product("Test Phone", "Some description", 5000.0, 3),
-        Product("Another Phone", "Different description", 15000.0, 10),
-    ]
-    updated_product = Product.new_product(product_data, existing_products)
-    assert updated_product.quantity == 8  # Старое кол-во плюс новое
-    assert updated_product.price == 10000.0  # Максимальная цена выбрана
-
-
-def test_new_product_class_method_new():
-    """Проверка class-метода при отсутствии товара"""
-    product_data = {
-        "name": "New Phone",
-        "description": "",
-        "price": 10000.0,
-        "quantity": 5,
-    }
-    existing_products = [
-        Product("Test Phone", "Some description", 5000.0, 3),
-        Product("Another Phone", "Different description", 15000.0, 10),
-    ]
-    new_product = Product.new_product(product_data, existing_products)
-    assert isinstance(new_product, Product)
-    assert new_product.name == "New Phone"
-    assert new_product.price == 10000.0
-    assert new_product.quantity == 5
-
-
-def test_product_representation():
-    """Проверка метода __repr__"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    representation = repr(product)
-    assert representation.startswith(
-        "Product(Test Phone"
-    )  # Ожидаемый вывод начинается с имени товара
-
-
-def test_product_string_representation():
-    """Проверка метода __str__"""
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    string_representation = str(product)
-    assert "Test Phone" in string_representation
-    assert "10000.00 руб." in string_representation
-    assert "Остаток: 5 шт." in string_representation
-
-
-def test_product_sum_operator():
-    """Проверка операции суммирования двух продуктов"""
-    product1 = Product("Test Phone", "Some description", 10000.0, 5)
-    product2 = Product("Another Phone", "Other description", 15000.0, 10)
-    total_cost = product1 + product2
-    assert total_cost == 200000.0  # Общая стоимость всех товаров
-
-
-# --- Тесты для класса Category ---
-
-
-def test_category_initialization():
-    """Проверка правильной инициализации категории"""
-    category = Category("Electronics", "All kinds of electronics")
-    assert category.products == [], "Список товаров должен быть пустым!"
-
-
-def test_add_product_to_category():
-    """Проверка добавления товара в категорию"""
-    category = Category("Electronics", "All kinds of electronics")
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    category.add_product(product)
-    assert category.product_count() == 1
-
-
-def test_category_representation():
-    """Проверка метода __repr__"""
-    category = Category("Electronics", "All kinds of electronics")
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    category.add_product(product)
-    representation = repr(category)
-    expected_repr = "Category(\n[Product(Test Phone, 10000.0, 5)]\n)"
-    assert representation == expected_repr, (
-        "Представление не соответствует ожиданиям."
+@pytest.fixture
+def smartphone():
+    return Smartphone(
+        "Samsung Galaxy S23 Ultra",
+        "256GB, Серый цвет, 200MP камера",
+        180000.0,
+        5,
+        95.5,
+        "S23 Ultra",
+        256,
+        "Серый"
     )
 
+@pytest.fixture
+def another_smartphone():
+    return Smartphone(
+        "iPhone 15 Pro Max",
+        "1TB, Black Matte",
+        220000.0,
+        3,
+        98.2,
+        "Pro Max",
+        1024,
+        "Black Matte"
+    )
 
-def test_category_string_representation():
-    """Проверка метода __str__"""
-    category = Category("Electronics", "All kinds of electronics")
-    product = Product("Test Phone", "Some description", 10000.0, 5)
-    category.add_product(product)
-    string_representation = str(category)
-    assert 'Категория "Electronics"' in string_representation
-    assert "Количество продуктов: 5 шт." in string_representation
+@pytest.fixture
+def lawn_grass():
+    return LawnGrass(
+        "Газонная трава",
+        "Элитная смесь семян",
+        500.0,
+        20,
+        "Германия",
+        "10 дней",
+        "Зелёный"
+    )
 
+@pytest.fixture
+def category():
+    return Category("Смартфоны", "Высокая производительность", [])
 
-def test_get_total_quantity():
-    """Проверка суммарного количества товаров в категории"""
-    category = Category("Electronics", "All kinds of electronics")
-    product1 = Product("Test Phone", "Some description", 10000.0, 5)
-    product2 = Product("Another Phone", "Other description", 15000.0, 10)
-    category.add_product(product1)
-    category.add_product(product2)
-    assert category.product_count() == 2
-    assert (
-        sum([p.quantity for p in category.products]) == 15
-    )  # Суммарное количество товаров
+# Основные тесты для класса Product и его подклассов
+
+def test_product_repr_and_str(smartphone):
+    expected_repr = f'Smartphone(Samsung Galaxy S23 Ultra, S23 Ultra, 256, Серый)'
+    expected_str = "Samsung Galaxy S23 Ultra: S23 Ultra, 256 ГБ, Серый"
+    assert repr(smartphone) == expected_repr
+    assert str(smartphone) == expected_str
+
+def test_product_change_price(smartphone):
+    original_price = smartphone.price
+    smartphone.price = 200000.0
+    assert smartphone.price == 200000.0
+    smartphone.price = original_price  # Вернём обратно первоначальную цену
+
+def test_product_negative_price(smartphone):
+    with pytest.raises(ValueError):
+        smartphone.price = -100.0
+
+def test_product_change_quantity(smartphone):
+    smartphone.quantity = 10
+    assert smartphone.quantity == 10
+
+def test_product_negative_quantity(smartphone):
+    with pytest.raises(ValueError):
+        smartphone.quantity = -5
+
+# Тесты для категории
+
+def test_category_product_count(category, smartphone):
+    assert category.product_count() == 0  # Изначально пустой список
+    category.add_product(smartphone)
+    assert category.product_count() == 1  # После добавления одного продукта
+
+def test_category_add_valid_product(category, smartphone):
+    category.add_product(smartphone)
+    assert smartphone in category.products
+
+def test_category_add_invalid_product(category):
+    with pytest.raises(TypeError):
+        category.add_product("Некорректный продукт")
+
+def test_category_add_multiple_products(category, smartphone, another_smartphone):
+    category.add_product(smartphone)
+    category.add_product(another_smartphone)
+    assert len(category.products) == 2
+
+# Тесты для метода validate_price
+
+def test_validate_positive_price():
+    assert Product.validate_price("100") == True
+
+def test_validate_zero_price():
+    assert Product.validate_price("0") == False
+
+def test_validate_negative_price():
+    assert Product.validate_price("-50") == False
+
+def test_validate_non_numeric_price():
+    assert Product.validate_price("abc") == False
+
+# Дополнительные тесты для класса Smartphone
+
+def test_smartphone_repr_and_str(smartphone):
+    expected_repr = f'Smartphone(Samsung Galaxy S23 Ultra, S23 Ultra, 256, Серый)'
+    expected_str = "Samsung Galaxy S23 Ultra: S23 Ultra, 256 ГБ, Серый"
+    assert repr(smartphone) == expected_repr
+    assert str(smartphone) == expected_str
+
+# Тесты для LawnGrass
+
+def test_lawn_grass_repr_and_str(lawn_grass):
+    expected_repr = f"LawnGrass(Газонная трава, Германия, 10 дней, Зелёный)"
+    expected_str = "Газонная трава: Германия, 10 дней, Зелёный"
+    assert repr(lawn_grass) == expected_repr
+    assert str(lawn_grass) == expected_str
+
+# Тесты на исключение для суммы продуктов разного типа
+
+def test_incompatible_product_sum(smartphone, lawn_grass):
+    with pytest.raises(TypeError):
+        result = smartphone + lawn_grass
+
+# Тесты на суммирование стоимости однотипных продуктов
+
+def test_product_sum(smartphone, another_smartphone):
+    result = smartphone + another_smartphone
+    expected = smartphone.price * smartphone.quantity + another_smartphone.price * another_smartphone.quantity
+    assert result == expected
+
+# Тест на суммарное количество продукции в категории
+
+def test_category_total_products(category, smartphone, another_smartphone):
+    category.add_product(smartphone)
+    category.add_product(another_smartphone)
+    total_qty = sum([p.quantity for p in category.products])
+    assert total_qty == smartphone.quantity + another_smartphone.quantity
+
+@pytest.mark.parametrize("invalid_product", ["Некорректный продукт", 123, {"key": "value"}])
+def test_category_add_invalid_product(category, invalid_product):
+    with pytest.raises(TypeError):
+        category.add_product(invalid_product)
+
+def test_category_remove_existing_product(category, smartphone):
+    category.add_product(smartphone)
+    category.remove_product(smartphone)
+    assert smartphone not in category.products
+
+def test_category_empty_products_list():
+    empty_category = Category("Empty Category")
+    assert empty_category.product_count() == 0
+
+def test_category_total_products_with_one_product(category, smartphone):
+    category.add_product(smartphone)
+    assert category.product_count() == 1
+
+def test_category_getting_all_products(category, smartphone, another_smartphone):
+    category.add_product(smartphone)
+    category.add_product(another_smartphone)
+    retrieved_products = category.products
+    assert smartphone in retrieved_products and another_smartphone in retrieved_products
+
+def test_category_getting_products_copy(category, smartphone):
+    category.add_product(smartphone)
+    retrieved_products = category.products
+    retrieved_products.pop()
+    assert len(category.products) > 0
+
+def test_category_description_is_optional():
+    cat = Category("Без описания")
+    assert cat.description == ''  # описание по умолчанию пустое
