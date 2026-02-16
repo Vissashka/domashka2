@@ -90,6 +90,7 @@ class Smartphone(Product):
         self.color = color
         self.efficiency = efficiency
 
+
     def __repr__(self):
         return f'Smartphone({self.name}, {self.model}, {self.memory}, {self.color})'
 
@@ -105,6 +106,7 @@ class LawnGrass(Product):
         self.country = country
         self.germination_period = germination_period
         self.color = color
+
 
     def __repr__(self):
         return f"LawnGrass({self.name}, {self.country}, {self.germination_period}, {self.color})"
