@@ -56,7 +56,8 @@ class LoggingMixin:
 
     def __init__(self, *args, **kwargs):
         class_name = self.__class__.__name__
-        params = ', '.join(map(str, args)) + ', '.join(kwargs.keys()) if kwargs else ''
+        params = ', '.join(map(str, args)) + \
+            ', '.join(kwargs.keys()) if kwargs else ''
         print(f"Создан объект {class_name}({params})")
         super().__init__(*args, **kwargs)
 
@@ -70,10 +71,13 @@ class Product(BaseProduct, LoggingMixin):
         super().__init__(name, description, price, quantity)
 
     def __repr__(self):
-        return f"Product('{self.name}', '{self.description}', {self.price}, {self.quantity})"
+        return f"Product('{self.name}', '{self.description}', " \
+               f"{self.price}, {self.quantity})"
 
     def __str__(self):
-        return f"Товар: {self.name}. Цена: {self.price} руб., остаток: {self.quantity}"
+        return f"Товар: {self.name}. " \
+               f"Цена: {self.price} руб., " \
+               f"остаток: {self.quantity}"
 
 
 class Smartphone(Product):
@@ -87,7 +91,16 @@ class Smartphone(Product):
         else:
             raise TypeError("Несовместимые типы для сложения")
 
-    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+    def __init__(
+            self,
+            name,
+            description,
+            price,
+            quantity,
+            efficiency,
+            model,
+            memory,
+            color):
         super().__init__(name, description, price, quantity)
         self._efficiency = efficiency
         self._model = model
@@ -111,10 +124,17 @@ class Smartphone(Product):
         return self._color
 
     def __repr__(self):
-        return f"Smartphone('{self.name}', '{self.description}', {self.price}, {self.quantity}, {self.efficiency}, '{self.model}', {self.memory}, '{self.color}')"
+        return f"Smartphone('{self.name}', '{self.description}', " \
+               f"{self.price}, {self.quantity}, {self.efficiency}, " \
+               f"'{self.model}', {self.memory}, '{self.color}')"
 
     def __str__(self):
-        return f"Смартфон: {self.name}, Модель: {self.model}, Цвет: {self.color}, Эффективность: {self.efficiency}%"
+        return (
+            f"Смартфон: {self.name},\n"
+            f"Модель: {self.model},\n"
+            f"Цвет: {self.color},\n"
+            f"Эффективность: {self.efficiency}%"
+        )
 
 
 class LawnGrass(Product):
@@ -128,8 +148,15 @@ class LawnGrass(Product):
         else:
             raise TypeError("Несовместимые типы для сложения")
 
-
-    def __init__(self, name, description, price, quantity, country, germination_period, color):
+    def __init__(
+            self,
+            name,
+            description,
+            price,
+            quantity,
+            country,
+            germination_period,
+            color):
         super().__init__(name, description, price, quantity)
         self._country = country
         self._germination_period = germination_period
@@ -148,50 +175,78 @@ class LawnGrass(Product):
         return self._color
 
     def __repr__(self):
-        return f"LawnGrass('{self.name}', '{self.description}', {self.price}, {self.quantity}, '{self.country}', '{self.germination_period}', '{self.color}')"
+        return (
+            f"LawnGrass('"
+            f"{self.name}', "
+            f"'{self.description}', "
+            f"{self.price}, "
+            f"{self.quantity}, "
+            f"'{self.country}', "
+            f"'{self.germination_period}', "
+            f"'{self.color}'"
+            ")"
+        )
 
     def __str__(self):
-        return f"Газонная трава: {self.name}, Страна происхождения: {self.country}, Период всхожести: {self.germination_period}, Цвет: {self.color}"
+        return (
+            f"Газонная трава: {self.name},\n"
+            f"Страна происхождения: {self.country},\n"
+            f"Период всхожести: {self.germination_period},\n"
+            f"Цвет: {self.color}"
+        )
 
 
 class Category:
-    """
-    Категория товаров в магазине.
-    """
+    categories = []
 
-    def __init__(self, name, description='', products=None):
-        self._name = name
-        self._description = description
-        self._products = [] if products is None else list(products)
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def description(self):
-        return self._description
+    def __init__(self, name, description, products=None):
+        self.name = name
+        self.description = description
+        if products is None:
+            self._products = []
+            self.count = 0  # Начнём с нуля продуктов
+        else:
+            self._products = list(products)
+            self.count = len(products)
+        Category.categories.append(self)
 
     @property
     def products(self):
-        return self._products.copy()
+        return self._products
+
+    @products.setter
+    def products(self, value):
+        if all(isinstance(item, Product) for item in value):
+            self._products = value
+            self.count = len(value)  # Сразу установим новое количество
+        else:
+            raise ValueError("Список продуктов должен содержать только " +
+                             "объекты Product.")
+
+    def product_count(self):
+        """Возвращает количество продуктов в данной категории"""
+        return self.count
 
     def add_product(self, product):
         if not isinstance(product, Product):
             raise TypeError("Тип объекта не подходит")
-        self._products.append(product)
+        if product not in self._products:
+            self._products.append(product)
+            self.count += 1  # Увеличили счётчик на единицу
 
     def remove_product(self, product):
         if product in self._products:
             self._products.remove(product)
+            self.count -= 1  # Уменьшаем счётчик на единицу
         else:
             raise ValueError("Этот продукт отсутствует в категории")
 
-    def product_count(self):
-        return len(self._products)
-
     def __repr__(self):
-        return f"Category({self.name}, {len(self.products)} продуктов)"
+        return f"Category({self.name}, {len(self._products)} продуктов)"
 
     def __str__(self):
-        return f"Категория: {self.name}, Описание: {self.description}, Продукты: {len(self.products)}"
+        return (
+            f"Категория: {self.name}\n"
+            f"Описание: {self.description}\n"
+            f"Продуктов: {len(self._products)}"
+        )
