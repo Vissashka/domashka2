@@ -57,7 +57,7 @@ class LoggingMixin:
     def __init__(self, *args, **kwargs):
         class_name = self.__class__.__name__
         params = ', '.join(map(str, args)) + \
-            ', '.join(kwargs.keys()) if kwargs else ''
+                 ', '.join(kwargs.keys()) if kwargs else ''
         print(f"Создан объект {class_name}({params})")
         super().__init__(*args, **kwargs)
 
@@ -75,8 +75,8 @@ class Product(BaseProduct, LoggingMixin):
                f"{self.price}, {self.quantity})"
 
     def __str__(self):
-        return f"Товар: {self.name}. " \
-               f"Цена: {self.price} руб., " \
+        return f"Товар: {self.name}.\n" \
+               f"Цена: {self.price} руб.\n" \
                f"остаток: {self.quantity}"
 
 
@@ -197,47 +197,44 @@ class LawnGrass(Product):
 
 
 class Category:
-    categories = []
+    """
+    Класс для категорий товаров.
+    """
+
+    category_count = 0  # Статическое поле для учёта количества категорий
+    total_product_count = 0
 
     def __init__(self, name, description, products=None):
         self.name = name
         self.description = description
         if products is None:
-            self._products = []
-            self.count = 0  # Начнём с нуля продуктов
+            self._products = []  # Список продуктов внутри категории
         else:
             self._products = list(products)
-            self.count = len(products)
-        Category.categories.append(self)
+
+        # Инкрементируем счётчики при создании нового экземпляра
+        Category.category_count += 1
+        Category.total_product_count += len(self._products)
 
     @property
     def products(self):
         return self._products
 
-    @products.setter
-    def products(self, value):
-        if all(isinstance(item, Product) for item in value):
-            self._products = value
-            self.count = len(value)  # Сразу установим новое количество
-        else:
-            raise ValueError("Список продуктов должен содержать только " +
-                             "объекты Product.")
-
     def product_count(self):
-        """Возвращает количество продуктов в данной категории"""
-        return self.count
+        """Возвращает количество продуктов в данной категории."""
+        return len(self._products)
 
     def add_product(self, product):
         if not isinstance(product, Product):
             raise TypeError("Тип объекта не подходит")
         if product not in self._products:
             self._products.append(product)
-            self.count += 1  # Увеличили счётчик на единицу
+            Category.total_product_count += 1
 
     def remove_product(self, product):
         if product in self._products:
             self._products.remove(product)
-            self.count -= 1  # Уменьшаем счётчик на единицу
+            Category.total_product_count -= 1
         else:
             raise ValueError("Этот продукт отсутствует в категории")
 
@@ -250,3 +247,8 @@ class Category:
             f"Описание: {self.description}\n"
             f"Продуктов: {len(self._products)}"
         )
+
+    @classmethod
+    def get_total_product_count(cls):
+        """Получаем общее число продуктов во всех категориях."""
+        return cls.total_product_count

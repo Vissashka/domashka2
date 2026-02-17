@@ -124,7 +124,7 @@ if __name__ == "__main__":
     print(category_smartphones.products)
 
     # Проверяем общее количество продуктов в категории
-    print(Category.product_count())
+    print(category_smartphones.product_count())
 
     # Проверяем невозможность добавления произвольного объекта
     try:
