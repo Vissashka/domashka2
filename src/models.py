@@ -1,254 +1,205 @@
-from abc import ABCMeta, abstractmethod
+import abc
 
 
-class BaseProduct(metaclass=ABCMeta):
+class LoggingMixin:
+    def __init__(self, *args, **kwargs):
+        class_name = self.__class__.__name__
+        params = ', '.join(f'{k}={v}' for k, v in kwargs.items())
+        print(
+            f'Создан экземпляр {class_name}({params})',
+            flush=True)  # Чёткое указание на stdout
+        super().__init__(*args, **kwargs)
+
+
+class BaseProduct(metaclass=abc.ABCMeta):
     """
-    Абстрактный класс для общих свойств всех продуктов.
+    Абстрактный базовый класс для всех типов продукции.
     """
 
     def __init__(self, name, description, price, quantity):
-        self._name = name
-        self._description = description
-        self._price = price
-        self._quantity = quantity
+        self.__name = name
+        self.__description = description
+        self.__price = price
+        self.__quantity = quantity
 
     @property
     def name(self):
-        return self._name
+        return self.__name
 
     @property
     def description(self):
-        return self._description
+        return self.__description
 
     @property
     def price(self):
-        return self._price
+        return self.__price
 
     @price.setter
     def price(self, value):
         if value <= 0:
-            raise ValueError("Цена должна быть больше нуля.")
-        self._price = value
+            raise ValueError(
+                "Ошибка: цена не должна быть нулевой или отрицательной!")
+        else:
+            self.__price = value
 
     @property
     def quantity(self):
-        return self._quantity
+        return self.__quantity
 
     @quantity.setter
     def quantity(self, value):
         if value < 0:
-            raise ValueError("Количество должно быть неотрицательным.")
-        self._quantity = value
+            raise ValueError("Количество товара не может быть отрицательным!")
+        elif value == 0:
+            raise ValueError(
+                "Товар с нулевым количеством не может быть добавлен!")
+        else:
+            self.__quantity = value
 
-    @abstractmethod
     def __repr__(self):
-        pass
+        return f"Product({self.name}, {self.price}, {self.quantity})"
 
-    @abstractmethod
     def __str__(self):
-        pass
+        return f"{self.name}, " \
+               f"{self.price:.2f} руб., " \
+               f"Остаток: {self.quantity} шт."
+
+    @staticmethod
+    def validate_price(price):
+        try:
+            price_value = float(price)
+            if price_value <= 0:
+                raise ValueError("Цена должна быть положительной")
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    @classmethod
+    def new_product(cls, data, existing_products=None):
+        name = data["name"]
+        description = data.get("description", "")
+        price = float(data["price"])
+        quantity = int(data["quantity"])
+
+        if existing_products is not None:
+            for product in existing_products:
+                if product.name == name:
+                    product.quantity += quantity
+                    if product.price < price:
+                        product.price = price
+                    return product
+
+        return cls(name, description, price, quantity)
+
+    # Определяем метод __add__, который запрещает сложение любых объектов
+    def __add__(self, other):
+        raise NotImplementedError("Сложение объектов не поддерживается")
 
 
-class LoggingMixin:
-    """
-    Класc-миксин для вывода сообщений при создании экземпляров.
-    """
-
-    def __init__(self, *args, **kwargs):
-        class_name = self.__class__.__name__
-        params = ', '.join(map(str, args)) + \
-                 ', '.join(kwargs.keys()) if kwargs else ''
-        print(f"Создан объект {class_name}({params})")
-        super().__init__(*args, **kwargs)
-
-
-class Product(BaseProduct, LoggingMixin):
-    """
-    Общий класс товаров магазина.
-    """
-
+class Product(BaseProduct):
     def __init__(self, name, description, price, quantity):
         super().__init__(name, description, price, quantity)
 
-    def __repr__(self):
-        return f"Product('{self.name}', '{self.description}', " \
-               f"{self.price}, {self.quantity})"
-
-    def __str__(self):
-        return f"Товар: {self.name}.\n" \
-               f"Цена: {self.price} руб.\n" \
-               f"остаток: {self.quantity}"
-
 
 class Smartphone(Product):
-    """
-    Конкретный класс смартфонов.
-    """
-
-    def __add__(self, other):
-        if isinstance(other, Smartphone):
-            return self.price + other.price  # Суммируем цены
-        else:
-            raise TypeError("Несовместимые типы для сложения")
+    """Класс описывает смартфон."""
 
     def __init__(
             self,
             name,
             description,
-            price,
-            quantity,
-            efficiency,
             model,
             memory,
-            color):
+            color,
+            efficiency,
+            price,
+            quantity):
         super().__init__(name, description, price, quantity)
-        self._efficiency = efficiency
-        self._model = model
-        self._memory = memory
-        self._color = color
-
-    @property
-    def efficiency(self):
-        return self._efficiency
-
-    @property
-    def model(self):
-        return self._model
-
-    @property
-    def memory(self):
-        return self._memory
-
-    @property
-    def color(self):
-        return self._color
+        self.model = model
+        self.memory = memory
+        self.color = color
+        self.efficiency = efficiency
 
     def __repr__(self):
-        return f"Smartphone('{self.name}', '{self.description}', " \
-               f"{self.price}, {self.quantity}, {self.efficiency}, " \
-               f"'{self.model}', {self.memory}, '{self.color}')"
+        return (
+            f'Smartphone({self.name}, '
+            f'{self.model}, '
+            f'{self.memory}, '
+            f'{self.color})'
+        )
 
     def __str__(self):
-        return (
-            f"Смартфон: {self.name},\n"
-            f"Модель: {self.model},\n"
-            f"Цвет: {self.color},\n"
-            f"Эффективность: {self.efficiency}%"
-        )
+        return f'{self.name}: {self.model}, {self.memory} ГБ, {self.color}'
 
 
 class LawnGrass(Product):
-    """
-    Конкретный класс газонной травы.
-    """
-
-    def __add__(self, other):
-        if isinstance(other, LawnGrass):
-            return self.price + other.price  # Сумма цен
-        else:
-            raise TypeError("Несовместимые типы для сложения")
-
     def __init__(
             self,
             name,
             description,
-            price,
-            quantity,
             country,
             germination_period,
-            color):
+            color,
+            price,
+            quantity):
         super().__init__(name, description, price, quantity)
-        self._country = country
-        self._germination_period = germination_period
-        self._color = color
-
-    @property
-    def country(self):
-        return self._country
-
-    @property
-    def germination_period(self):
-        return self._germination_period
-
-    @property
-    def color(self):
-        return self._color
-
-    def __repr__(self):
-        return (
-            f"LawnGrass('"
-            f"{self.name}', "
-            f"'{self.description}', "
-            f"{self.price}, "
-            f"{self.quantity}, "
-            f"'{self.country}', "
-            f"'{self.germination_period}', "
-            f"'{self.color}'"
-            ")"
-        )
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
 
     def __str__(self):
         return (
-            f"Газонная трава: {self.name},\n"
-            f"Страна происхождения: {self.country},\n"
-            f"Период всхожести: {self.germination_period},\n"
-            f"Цвет: {self.color}"
+            f'{self.name}: '
+            f'{self.country}, '
+            f'{self.germination_period}, '
+            f'{self.color}'
         )
 
 
 class Category:
-    """
-    Класс для категорий товаров.
-    """
+    _counter = 0
+    category_count = 0
 
-    category_count = 0  # Статическое поле для учёта количества категорий
-    total_product_count = 0
-
-    def __init__(self, name, description, products=None):
-        self.name = name
-        self.description = description
+    def __init__(self, name, description="", products=None):
+        self.__name = name
+        self.__description = description
         if products is None:
-            self._products = []  # Список продуктов внутри категории
+            self.__products = []
         else:
-            self._products = list(products)
-
-        # Инкрементируем счётчики при создании нового экземпляра
+            self.__products = products
+        # Увеличиваем счетчик категорий при создании новой категории
         Category.category_count += 1
-        Category.total_product_count += len(self._products)
 
     @property
-    def products(self):
-        return self._products
+    def name(self):
+        return self.__name
 
     def product_count(self):
-        """Возвращает количество продуктов в данной категории."""
-        return len(self._products)
+        return len(self.__products)
+
+    def middle_price(self):
+        if not self.__products:
+            return 0
+        prices = [p.price for p in self.__products]
+        return round(sum(prices) / len(prices), 2)
 
     def add_product(self, product):
         if not isinstance(product, Product):
-            raise TypeError("Тип объекта не подходит")
-        if product not in self._products:
-            self._products.append(product)
-            Category.total_product_count += 1
+            raise TypeError(
+                "Можно добавлять только продукты и их производные классы.")
 
-    def remove_product(self, product):
-        if product in self._products:
-            self._products.remove(product)
-            Category.total_product_count -= 1
-        else:
-            raise ValueError("Этот продукт отсутствует в категории")
+        self.__products.append(product)
+        # Увеличиваем общий счетчик товаров
+        Category._counter += 1
+
+    @property
+    def products(self):
+        return self.__products
 
     def __repr__(self):
-        return f"Category({self.name}, {len(self._products)} продуктов)"
+        return f"Category(\n{self.products}\n)"
 
     def __str__(self):
-        return (
-            f"Категория: {self.name}\n"
-            f"Описание: {self.description}\n"
-            f"Продуктов: {len(self._products)}"
-        )
-
-    @classmethod
-    def get_total_product_count(cls):
-        """Получаем общее число продуктов во всех категориях."""
-        return cls.total_product_count
+        total_quantity = sum(p.quantity for p in self.__products)
+        return f'Категория "{self.name}", ' \
+               f'Количество продуктов: {total_quantity} шт.'
