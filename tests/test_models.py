@@ -1,90 +1,131 @@
 import pytest
-from src.models import Product, Category
+from src.models import Product, Smartphone, LawnGrass, Category
 
-# Тестируем класс Product
-def test_product_init():
-    product = Product("Телефон", "Смартфон премиум-класса", 79999.99, 10)
-    assert product.name == "Телефон"
-    assert product.description == "Смартфон премиум-класса"
-    assert product.price == 79999.99
-    assert product.quantity == 10
 
-def test_product_repr():
-    product = Product("Телефон", "Смартфон премиум-класса", 79999.99, 10)
-    expected_repr = 'Product(Телефон, 79999.99, 10)'
-    assert repr(product) == expected_repr
+@pytest.fixture
+def base_product():
+    return Product("Test Product", "This is a test product.", 100.0, 10)
 
-def test_product_str():
-    product = Product("Телефон", "Смартфон премиум-класса", 79999.99, 10)
-    expected_str = 'Телефон, 79999.99 руб. Остаток: 10 шт.'
-    assert str(product) == expected_str
 
-def test_product_addition():
-    product1 = Product("Телефон", "", 79999.99, 10)
-    product2 = Product("Ноутбук", "", 159999.99, 5)
-    total_cost = product1 + product2
-    assert total_cost == 1599999.85
+@pytest.fixture
+def smartphone():
+    return Smartphone(
+        "Galaxy",
+        "A great phone",
+        "Model-X",
+        128,
+        "Black",
+        90.0,
+        500.0,
+        5
+    )
 
-def test_invalid_price_setter():
-    product = Product("Телефон", "Смартфон премиум-класса", 79999.99, 10)
-    with pytest.raises(ValueError):
-        product.price = -100
 
-def test_invalid_quantity_setter():
-    product = Product("Телефон", "Смартфон премиум-класса", 79999.99, 10)
-    with pytest.raises(ValueError):
-        product.quantity = -5
+@pytest.fixture
+def lawn_grass():
+    return LawnGrass(
+        "Green Grass",
+        "Best for lawns",
+        "Russia",
+        "10 дней",
+        "Green",
+        10.0,
+        20
+    )
 
-def test_validate_price_valid():
-    valid_price = 100
-    assert Product.validate_price(valid_price) == True
 
-def test_validate_price_invalid():
-    invalid_price = "-100"
-    assert Product.validate_price(invalid_price) == False
+@pytest.fixture
+def category():
+    return Category("Electronics", "All kinds of electronics here")
 
-def test_new_product():
-    data = {
-        'name': 'Новый телефон',
-        'description': 'Новейшая модель телефона',
-        'price': '100000',
-        'quantity': '15'
+
+def test_base_product_repr(base_product):
+    assert repr(base_product) == "Product(Test Product, 100.0, 10)"
+
+
+def test_smartphone_str(smartphone):
+    assert str(smartphone) == "Galaxy: Model-X, 128 ГБ, Black"
+
+
+def test_lawn_grass_str(lawn_grass):
+    assert str(lawn_grass) == "Green Grass: Russia, 10 дней, Green"
+
+
+def test_category_add_product(category, base_product):
+    category.add_product(base_product)
+    assert len(category.products) == 1
+    assert category.product_count() == 1
+
+
+def test_new_product_creation():
+    product_data = {
+        "name": "New Phone",
+        "description": "",
+        "price": "500.0",
+        "quantity": "1"
     }
-    product = Product.new_product(data)
-    assert product.name == 'Новый телефон'
-    assert product.description == 'Новейшая модель телефона'
-    assert product.price == 100000
-    assert product.quantity == 15
+    result = Product.new_product(product_data)
+    assert isinstance(result, Product)
+    assert result.name == "New Phone"
+    assert result.price == 500.0
+    assert result.quantity == 1
 
-def test_new_product_existing_product():
-    existing_products = [
-        Product("Телефоны", "Телефоны бренда X", 50000, 10),
-        Product("Ноутбуки", "Ноутбуки марки Y", 100000, 5)
-    ]
-    data = {'name': 'Телефоны', 'price': '60000', 'quantity': '5'}
-    updated_product = Product.new_product(data, existing_products=existing_products)
-    assert updated_product.quantity == 15
-    assert updated_product.price == 60000
 
-# Тестируем класс Category
-def test_category_init_and_add_product():
-    category = Category()
-    product = Product("Планшет", "Планшет среднего уровня", 39999.99, 20)
-    category.add_product(product)
-    assert len(category.products.split("\n")) == 1
-    assert "Планшет" in category.products
+def test_addition_of_same_type_objects():
+    prod1 = Product("Phone A", "First phone", 100.0, 2)
+    prod2 = Product("Phone B", "Second phone", 200.0, 3)
+    with pytest.raises(NotImplementedError):
+        prod1 + prod2
 
-def test_category_repr():
-    category = Category()
-    product = Product("Планшет", "Планшет среднего уровня", 39999.99, 20)
-    category.add_product(product)
-    expected_repr = f'Category(\nПланшет, 39999.99 руб. Остаток: 20 шт.\n)'
-    assert repr(category) == expected_repr
 
-def test_category_str():
-    category = Category()
-    product = Product("Планшет", "Планшет среднего уровня", 39999.99, 20)
-    category.add_product(product)
-    expected_str = f'Категория "Category", количество продуктов: 20 шт.'
-    assert str(category) == expected_str
+def test_invalid_addition_raises_error():
+    prod1 = Product("Phone A", "First phone", 100.0, 2)
+    with pytest.raises(NotImplementedError):
+        prod1 + "Invalid object"
 
+
+def test_setter_validations():
+    prod = Product("Test Product", "Test Description", 100.0, 10)
+
+    # Цена меньше нуля вызывает ошибку
+    with pytest.raises(ValueError):
+        prod.price = -50.0
+
+    # Отрицательное количество товаров недопустимо
+    with pytest.raises(ValueError):
+        prod.quantity = -5
+
+    # Нулевое количество также недопустимо
+    with pytest.raises(ValueError):
+        prod.quantity = 0
+
+
+def test_category_static_fields():
+    Category.category_count = 0  # Сбрасываем счётчик
+    Category("Electronics")     # Просто создаём категорию, не сохраняем ссылку
+    Category("Sports Goods")    # А вторая категория тоже просто создаётся
+    assert Category.category_count == 2
+
+
+def test_add_product_to_category_increases_counter():
+    Category._counter = 0  # Обязательно обнулить счётчик перед началом теста!
+    cat = Category("Books")
+    book1 = Product("Book Title", "Some description", 100.0, 10)
+    cat.add_product(book1)
+    assert Category._counter == 1
+
+
+def test_middle_price_with_products():
+    cat = Category("Phones")
+    phone1 = Product("Phone X", "Great quality", 500.0, 5)
+    phone2 = Product("Phone Y", "High performance", 700.0, 3)
+    cat.add_product(phone1)
+    cat.add_product(phone2)
+    avg_price = cat.middle_price()
+    assert avg_price == 600.0
+
+
+def test_middle_price_without_products():
+    empty_cat = Category("Empty Category")
+    avg_price = empty_cat.middle_price()
+    assert avg_price == 0

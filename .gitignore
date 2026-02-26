@@ -51,7 +51,7 @@ desktop.ini
 
 # Файлы зависимостей и виртуальных сред
 node_modules/
-venv/
+.venv/
 env/
 virtualenv/
 pip-selfcheck.json
@@ -146,4 +146,5 @@ npm-debug.log*
 *.eslintcache
 #coverage/
 
-.venv
+
+
